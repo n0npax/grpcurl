@@ -25,6 +25,7 @@ import (
 	"github.com/jhump/protoreflect/desc"
 	"github.com/jhump/protoreflect/desc/protoprint"
 	"github.com/jhump/protoreflect/dynamic"
+	"golang.org/x/net/proxy"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -638,7 +639,8 @@ func BlockingDial(ctx context.Context, network, address string, creds credential
 		// handshake). And that would mean that the library would send the
 		// wrong ":scheme" metaheader to servers: it would send "http" instead
 		// of "https" because it is unaware that TLS is actually in use.
-		conn, err := (&net.Dialer{}).DialContext(ctx, network, address)
+		// Use HTTPS_PROXY if it's set up:
+		conn, err := proxy.Dial(ctx, network, address)
 		if err != nil {
 			writeResult(err)
 		}
